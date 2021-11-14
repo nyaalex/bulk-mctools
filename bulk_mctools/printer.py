@@ -22,7 +22,7 @@ def print_response(res, flags=(True, True, True)):
         else:
             player_list = 'null'
 
-        info = [host, ping, version, description, player_count, player_list]
+        info = [host, ping, version, repr(description), player_count, player_list]
 
         return ','.join(info)
     except Exception as e:
