@@ -6,11 +6,12 @@ import time
 
 class QueryThread(threading.Thread):
 
-    def __init__(self, host_queue, output_queue):
+    def __init__(self, host_queue, output_queue, timeout):
         super().__init__()
         self.kill = threading.Event()
         self.hosts = host_queue
         self.output = output_queue
+        self.timeout = timeout
 
     def run(self):
         while not self.kill.is_set():
@@ -22,15 +23,14 @@ class QueryThread(threading.Thread):
                     time.sleep(1/50)
                     continue
 
-                ping = StatusPing(host, 25565, 5)
+                ping = StatusPing(host, 25565, self.timeout)
                 status = ping.get_status()
                 status['host'] = host
 
                 self.output.put(status)
 
             except Exception as e:
-                # print(e)
-                pass
+                self.output.put(False)
 
     def stop(self):
         self.kill.set()
@@ -38,14 +38,14 @@ class QueryThread(threading.Thread):
 
 class QueriesHandler:
 
-    def __init__(self, num_threads):
+    def __init__(self, num_threads, timeout):
         self.threads = []
 
         self.output_queue = queue.Queue()
         self.hosts_queue = queue.Queue()
 
         for i in range(num_threads):
-            self.threads.append(QueryThread(self.hosts_queue, self.output_queue))
+            self.threads.append(QueryThread(self.hosts_queue, self.output_queue, timeout))
 
     def start(self):
         for query_thread in self.threads:
