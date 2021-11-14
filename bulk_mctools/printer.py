@@ -24,6 +24,6 @@ def print_response(res, flags=(True, True, True)):
 
         info = [host, ping, version, repr(description), player_count, player_list]
 
-        return ','.join(info)
+        return ','.join(info) + '\n'
     except Exception as e:
         return e, res['host']

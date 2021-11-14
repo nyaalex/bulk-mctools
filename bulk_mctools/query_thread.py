@@ -48,9 +48,9 @@ class QueriesHandler:
             self.threads.append(QueryThread(self.hosts_queue, self.output_queue))
 
     def start(self):
-        for spammer in self.threads:
-            spammer.start()
+        for query_thread in self.threads:
+            query_thread.start()
 
     def stop(self):
-        for spammer in self.threads:
-            spammer.stop()
+        for query_thread in self.threads:
+            query_thread.stop()
