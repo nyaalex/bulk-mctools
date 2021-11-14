@@ -29,7 +29,8 @@ class QueryThread(threading.Thread):
                 self.output.put(status)
 
             except Exception as e:
-                print(e)
+                # print(e)
+                pass
 
     def stop(self):
         self.kill.set()
