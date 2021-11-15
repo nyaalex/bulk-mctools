@@ -36,7 +36,14 @@ def print_response(res):
         else:
             player_list = 'null'
 
-        info = [host, ping, version, repr(description), player_count, player_list]
+        if 'forgeData' in res:
+            mods = str(len(res['forgeData']['mods']))
+        elif 'modinfo' in res:
+            mods = str(len(res['modinfo']['modList']))
+        else:
+            mods = '0'
+
+        info = [host, ping, version, mods, repr(description), player_count, player_list]
 
         return ','.join(info) + '\n'
     except Exception as e:
