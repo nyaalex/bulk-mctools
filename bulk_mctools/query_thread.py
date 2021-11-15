@@ -1,5 +1,6 @@
 import threading
 import queue
+import sys
 from .statusping import StatusPing
 import time
 
@@ -18,19 +19,22 @@ class QueryThread(threading.Thread):
             try:
                 # MAIN CODE
                 if not self.hosts.empty():
-                    host = self.hosts.get()
+                    host = self.hosts.get_nowait()
                 else:
                     time.sleep(1/50)
                     continue
 
                 ping = StatusPing(host, 25565, self.timeout)
-                status = ping.get_status()
-                status['host'] = host
+                try:
+                    status = ping.get_status()
+                    status['host'] = host
+                    self.output.put(status)
 
-                self.output.put(status)
+                except Exception as e:
+                    self.output.put(False)
 
             except Exception as e:
-                self.output.put(False)
+                print(e, file=sys.stderr)
 
     def stop(self):
         self.kill.set()

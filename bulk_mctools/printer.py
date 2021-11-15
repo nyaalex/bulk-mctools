@@ -26,4 +26,4 @@ def print_response(res, flags=(True, True, True)):
 
         return ','.join(info) + '\n'
     except Exception as e:
-        return e, res['host']
+        return str(e) + ',' + res['host']
