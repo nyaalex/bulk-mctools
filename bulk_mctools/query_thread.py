@@ -1,6 +1,5 @@
 import threading
 import queue
-import sys
 from .statusping import StatusPing
 import time
 
@@ -21,20 +20,22 @@ class QueryThread(threading.Thread):
                 if not self.hosts.empty():
                     host = self.hosts.get_nowait()
                 else:
-                    time.sleep(1/50)
+                    time.sleep(1/20)
                     continue
 
                 ping = StatusPing(host, 25565, self.timeout)
                 try:
                     status = ping.get_status()
                     status['host'] = host
-                    self.output.put(status)
+                    output = status
 
                 except Exception as e:
-                    self.output.put(False)
+                    output = False
+
+                self.output.put_nowait(output)
 
             except Exception as e:
-                print(e, file=sys.stderr)
+                raise e
 
     def stop(self):
         self.kill.set()
@@ -43,18 +44,26 @@ class QueryThread(threading.Thread):
 class QueriesHandler:
 
     def __init__(self, num_threads, timeout):
-        self.threads = []
+        self._threads = []
+        self.has_stopped = False
 
         self.output_queue = queue.Queue()
         self.hosts_queue = queue.Queue()
 
         for i in range(num_threads):
-            self.threads.append(QueryThread(self.hosts_queue, self.output_queue, timeout))
+            self._threads.append(QueryThread(self.hosts_queue, self.output_queue, timeout))
 
     def start(self):
-        for query_thread in self.threads:
+        for query_thread in self._threads:
             query_thread.start()
 
+    def is_alive(self):
+        x = False
+        for query_thread in self._threads:
+            x = x or query_thread.is_alive()
+        return x
+
     def stop(self):
-        for query_thread in self.threads:
+        for query_thread in self._threads:
             query_thread.stop()
+        self.has_stopped = True

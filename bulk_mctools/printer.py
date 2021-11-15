@@ -1,21 +1,35 @@
+import re
+
+
 def read_desc(description):
+    output = ''
     if type(description) == str:
         return description
-    elif 'extra' in description:
-        return ''.join([i['text'] for i in description['extra']])
-    elif 'text' in description:
-        return description['text']
-    else:
-        return description['translate']
+
+    if 'extra' in description:
+        for i in description['extra']:
+            output += read_desc(i)
+
+    if 'text' in description:
+        output += description['text']
+
+    if 'translate' in description:
+        output += description['translate']
+
+    return re.sub('§.', '', output)
 
 
-def print_response(res, flags=(True, True, True)):
+def print_response(res):
     try:
         host = res['host']
         ping = str(res['ping'])
         version = res['version']['name']
         description = read_desc(res['description'])
-        player_count = str(res['players']['online'])
+
+        if 'players' in res:
+            player_count = str(res['players']['online'])
+        else:
+            player_count = '0'
 
         if player_count != '0' and 'sample' in res['players']:
             player_list = ';'.join([i['name'] for i in res['players']['sample']])
@@ -26,4 +40,4 @@ def print_response(res, flags=(True, True, True)):
 
         return ','.join(info) + '\n'
     except Exception as e:
-        return str(e) + ',' + res['host']
+        raise Exception(str(e) + ',' + res['host'])

@@ -1,4 +1,3 @@
-import sys
 import argparse
 import time
 from .query_thread import QueriesHandler
@@ -27,25 +26,20 @@ def run():
 
     bar = tqdm(total=host_count)
 
-    while not handler.hosts_queue.empty():
+    should_loop = True
+
+    while should_loop:
+        bar.update(0)
         if handler.output_queue.empty():
-            time.sleep(1/20)
+            time.sleep(1 / 30)
         else:
             res = handler.output_queue.get()
             if res:
                 args.output.write(print_response(res))
             bar.update(1)
 
+        if handler.hosts_queue.empty() and handler.is_alive() and not handler.has_stopped:
+            handler.stop()
+        should_loop = handler.is_alive() or not handler.output_queue.empty()
+
     bar.close()
-    handler.stop()
-
-    while not handler.output_queue.empty():
-        res = handler.output_queue.get()
-        if res:
-            args.output.write(print_response(res))
-        bar.update(1)
-    bar.close()
-
-
-if __name__ == '__main__':
-    run()

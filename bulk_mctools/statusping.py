@@ -132,6 +132,7 @@ class StatusPing:
 
         # Load json and return
         response = json.loads(data.decode('utf8'))
+        assert response
         response['ping'] = int(time.time() * 1000) - struct.unpack('L', unix)[0]
 
         return response
