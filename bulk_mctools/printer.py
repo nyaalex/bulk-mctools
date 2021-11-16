@@ -4,7 +4,7 @@ import re
 def read_desc(description):
     output = ''
     if type(description) == str:
-        return description
+        return re.sub('§.', '', description)
 
     if 'extra' in description:
         for i in description['extra']:
