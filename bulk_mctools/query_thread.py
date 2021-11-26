@@ -23,7 +23,11 @@ class QueryThread(threading.Thread):
                     time.sleep(1/20)
                     continue
 
-                ping = StatusPing(host, 25565, self.timeout)
+                if ':' in host:
+                    host, port = host,split(':')
+                    port = int(port)
+                
+                ping = StatusPing(host, port, self.timeout)
                 try:
                     status = ping.get_status()
                     status['host'] = host
