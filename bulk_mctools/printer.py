@@ -40,6 +40,8 @@ def print_response(res):
             mods = str(len(res['forgeData']['mods']))
         elif 'modinfo' in res:
             mods = str(len(res['modinfo']['modList']))
+        elif 'modpackData' in res:
+            mods = '>1'
         else:
             mods = '0'
 

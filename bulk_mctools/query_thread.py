@@ -24,8 +24,10 @@ class QueryThread(threading.Thread):
                     continue
 
                 if ':' in host:
-                    host, port = host,split(':')
+                    host, port = host.split(':')
                     port = int(port)
+                else:
+                    port = 25565
                 
                 ping = StatusPing(host, port, self.timeout)
                 try:
